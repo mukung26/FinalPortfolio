@@ -1,0 +1,6 @@
+{
+  "name": "Online Portfolio",
+  "description": "Interactive online portfolio for Jerwin Cruspero, Web Developer, Accounts Payable Specialist, and Customer Service Representative, featuring a dynamic CV PDF download, dark mode, smooth scroll, contact form, and smooth infinite projects slider.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

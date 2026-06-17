@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@variant dark (.app-dark-mode &);
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Dark mode background transitions */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensures sections don't hide under the fixed header when navigating */
+section {
+  scroll-margin-top: 5.5rem;
+}
+
+.bg-pattern {
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.app-dark-mode .bg-pattern {
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s ease;
+  z-index: 50;
+}
+
+.app-dark-mode .glass {
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -9px;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 4px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-dark-mode .timeline-dot {
+  border-color: #0f172a;
+}
+
+.success-checkmark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  background: #dcfce7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+  font-size: 32px;
+}
+
+.app-dark-mode .success-checkmark {
+  background: #064e3b;
+  color: #4ade80;
+}
+
+/* Hide Scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
