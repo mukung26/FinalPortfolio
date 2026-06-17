@@ -655,12 +655,21 @@ export default function App() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 dark:bg-blue-900/10 rounded-full -mr-32 -mt-32 opacity-40"></div>
             <div className="relative z-10 flex flex-col gap-12 items-start">
               <div className="w-full">
-                <h2 className="text-blue-600 font-extrabold uppercase tracking-widest text-xs mb-4">
-                  Professional Summary
-                </h2>
-                <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
-                  Jerwin Cruspero
-                </h1>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
+                  <img
+                    src="https://github.com/mukung26.png"
+                    alt="Jerwin Cruspero"
+                    className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 shadow-md object-cover"
+                  />
+                  <div>
+                    <h2 className="text-blue-600 font-extrabold uppercase tracking-widest text-xs mb-2 md:mb-4">
+                      Professional Summary
+                    </h2>
+                    <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
+                      Jerwin Cruspero
+                    </h1>
+                  </div>
+                </div>
                 <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed mb-8 max-w-4xl">
                   I create <strong>personal and custom websites</strong> designed for performance and
                   reliability. Specializing in secure web tools using React, Tailwind CSS, and
