@@ -83,7 +83,7 @@ const downloadCV = async (): Promise<void> => {
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(60, 60, 60);
     pdf.text(
-      'Website Developer \u2022 Virtual Assistant \u2022 Customer Service',
+      'Web Developer \u2022 Digital Marketing \u2022 Marketing Automation \u2022 Virtual Assistant',
       margin,
       y
     );
@@ -123,7 +123,7 @@ const downloadCV = async (): Promise<void> => {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(8.5);
     const summaryText =
-      'Professional Website Developer specializing in creating custom, personal, and business websites. I build secure, high-performance web tools using React, Tailwind CSS, and Cloudflare/Google database integrations. With a strong background in Customer Service, Virtual Assistance, and Admin Support, I ensure solutions are not only technical but also user-friendly and reliable.';
+      'Results-oriented Web Developer and Digital Marketer. I build fast, user-friendly websites with React and automate marketing tasks to save time. By combining my web development skills with my background in customer service, I help businesses grow online, create better landing pages, and track the data that matters.';
     const summaryLines = pdf.splitTextToSize(summaryText, maxWidth);
     pdf.text(summaryLines, margin, y);
     y += summaryLines.length * 4.5 + 6;
@@ -139,11 +139,11 @@ const downloadCV = async (): Promise<void> => {
     pdf.setFont('helvetica', 'normal');
 
     const techSkills = [
-      'Frontend Development (React, Tailwind CSS, HTML5, CSS3)',
-      'Backend & APIs (Node.js, RESTful APIs, Webhooks)',
-      'Google Workspace Automation (Apps Script)',
-      'Cloud & Databases (Firebase, Cloudflare, SQL)',
-      'Data Analysis & Reporting (Excel, Pivot Tables)',
+      'Analytics & Reporting: Data Analysis (Excel), Business Dashboards, Performance Tracking',
+      'Marketing Automation: Workflow Automation, App Integrations, Google Apps Script',
+      'Web Development: Frontend (React, Tailwind), Website Optimization, User Experience',
+      'Backend & Data: API Connections, Databases (Firebase, SQL), Node.js',
+      'AI & Prompt Engineering: Prompt Writing, AI Content Generation, AI Model Testing',
     ];
 
     techSkills.forEach((line) => {
@@ -163,11 +163,12 @@ const downloadCV = async (): Promise<void> => {
     pdf.setFont('helvetica', 'normal');
 
     const softSkillsPdf = [
-      'Client Communication & Relationship Management',
-      'Proactive Problem Solving & Analytical Thinking',
-      'Cross-Functional Team Collaboration',
-      'Adaptability & Continuous Learning',
-      'Customer-Centric Mindset & Empathy',
+      'Problem Solving & Analysis',
+      'Team Collaboration',
+      'Time Management',
+      'Adaptability & Learning',
+      'Attention to Detail',
+      'Clear Client Communication',
     ];
 
     softSkillsPdf.forEach((line) => {
@@ -189,10 +190,10 @@ const downloadCV = async (): Promise<void> => {
       'Six Eleven Global Services',
       'Customer Service Representative \u2014 Davao | 03/2024 \u2013 06/2026',
       [
-        'Train new CSRs on order processing, credit handling, and escalation procedures; recognized as top performer with high QA scores.',
-        'Primary contact for order entry and email inquiries; process customer orders while meeting SLAs.',
-        'Support AP readiness: input invoices and credit notes, prepare data for vendor reconciliation.',
-        'Prepare spreadsheets using formulas and pivot tables for month-end checks and GL allocations.',
+        'Trained new team members on how to use platforms, handle issues, and meet quality goals; recognized as a top performer.',
+        'Acted as the main contact for customers, ensuring all accounts were handled quickly and professionally.',
+        'Created clear spreadsheets and charts to track performance and important monthly goals.',
+        'Organized invoice records and checked payments to make sure everything was accurate.',
       ],
       margin,
       y
@@ -205,9 +206,9 @@ const downloadCV = async (): Promise<void> => {
       'Tempestas ESports',
       'Administrative Support \u2014 Davao | 12/2020 \u2013 12/2022',
       [
-        'Managed administrative workflows and internal spreadsheets supporting month-end tasks.',
-        'Streamlined booking and reporting processes, improving data accuracy and reducing admin time.',
-        'Provided chat and email support for customer inquiries and order coordination.',
+        'Handled daily administrative tasks and kept important team spreadsheets up-to-date.',
+        'Simplified reporting processes, making data tracking faster and more accurate.',
+        'Helped customers through chat and email, providing quick and polite solutions.',
       ],
       margin,
       y
@@ -230,6 +231,8 @@ const downloadCV = async (): Promise<void> => {
     y += 6;
 
     pdf.setFontSize(8.5);
+    pdf.text('\u2022 Outlier AI Training: Prompt Engineering & AI Evaluation (2023 \u2013 2024)', margin + 2, y);
+    y += 4.5;
     pdf.text('\u2022 Microsoft 365 Developer Fundamentals (2023 \u2013 2024)', margin + 2, y);
     y += 4.5;
     pdf.text('\u2022 WordCamp Davao Participant (2023)', margin + 2, y);
@@ -499,24 +502,36 @@ export default function App() {
     sliderRef.current.scrollLeft = scrollLeft.current - walk;
   };
 
-  const coreSkills = [
-    'Frontend (React, Tailwind)',
-    'Backend (Node.js, APIs)',
-    'Database (Firebase, SQL)',
-    'Data Analysis (Excel, Pivot)',
-    'Automation (Apps Script)',
-    'Webhooks & Integrations',
-    'Secure Cloud Architecture',
-    'Performance Optimization',
+  const techSkillCategories = [
+    {
+      title: 'Analytics & Reporting',
+      skills: ['Data Analysis (Excel)', 'Business Dashboards', 'Performance Tracking'],
+    },
+    {
+      title: 'Marketing Automation',
+      skills: ['Workflow Automation', 'App Integrations', 'Google Apps Script'],
+    },
+    {
+      title: 'Web Development',
+      skills: ['Frontend (React, Tailwind)', 'Website Optimization', 'User Experience (UX)'],
+    },
+    {
+      title: 'Backend & Data',
+      skills: ['API Connections', 'Databases (Firebase, SQL)', 'Node.js'],
+    },
+    {
+      title: 'AI & Prompt Engineering',
+      skills: ['Prompt Writing', 'AI Content Generation', 'AI Model Testing', 'Data Annotation'],
+    },
   ];
 
   const softSkills = [
-    'Client Communication',
-    'Agile Problem Solving',
-    'Cross-Functional Teamwork',
-    'Independent Time Management',
-    'Adaptability & Flexibility',
-    'Detail-Oriented QA',
+    'Problem Solving',
+    'Team Collaboration',
+    'Time Management',
+    'Adaptability',
+    'Attention to Detail',
+    'Clear Communication',
   ];
 
   const projects: Project[] = [
@@ -525,40 +540,40 @@ export default function App() {
       title: 'Shift Attendance Automation',
       meta: 'Google Apps Script • Sheets • Webhooks',
       icon: BarChart3,
-      body: 'Full implementation includes roster parsing, multi-span support, overnight shift handling, deduplication using PropertiesService, and scheduled triggers for fast reconciliation.',
-      impact: 'Reduced manual attendance entry by 90%, eliminated deduplication errors, and improved response time for reporting.',
+      body: 'Built a tool that automatically tracks employee schedules using Google Apps Script and Webhooks. This makes managing large amounts of data easier and saves time on daily admin work.',
+      impact: 'Removed 90% of manual data entry and fixed schedule matching errors.',
     },
     {
       id: 'p2',
       title: 'Bot UI & Webhook Dashboard',
       meta: 'React • Node.js • Cloudflare • Replit',
       icon: Bot,
-      body: 'A specialized website and dashboard designed for Bot UI integrations. Features real-time event inspection, payload validation, and seamless configuration of webhook listeners to streamline automation.',
-      impact: 'Enabled real-time integrations, reduced event debugging time from hours to minutes, and provided a user-friendly UI for operations.',
+      body: 'Created a simple dashboard to manage automated tasks. It organizes incoming sales leads, checks campaign data, and sends information to the CRM (Customer Relationship Management) system automatically.',
+      impact: 'Sped up how fast we process new leads and made the overall workflow much smoother.',
     },
     {
       id: 'p3',
       title: 'Operational Reporting Tools',
       meta: 'Sheets • Apps Script • Pivot Tables',
       icon: TrendingUp,
-      body: 'Automated reporting suite used to cross-check operational data against spreadsheets and support month-end reconciliations. Includes scheduled exports and pivot-driven summaries.',
-      impact: 'Reduced month-end close time by 40%, eliminated manual pivot table creation, and improved data accuracy.',
+      body: 'Set up an automated reporting system to track business goals. It creates regular summaries and charts, making it easy to see how marketing campaigns are performing.',
+      impact: 'Made reporting 40% faster while keeping data completely accurate and easy to read.',
     },
     {
       id: 'p4',
       title: 'Alert Bot Integrations',
       meta: 'Webhooks • API Integrations • Automation',
       icon: AlertCircle,
-      body: 'Webhook-driven alert system that automatically tags team members, routes incidents, and executes fallback workflows to improve response times and reduce manual intervention.',
-      impact: 'Reduced manual escalation steps from 5 to 1, cut average response time in half, and improved incident resolution.',
+      body: 'Designed an automated alert system that tags team members and directs issues to the right person. This helps the team communicate better and reply to customers faster.',
+      impact: 'Automated the notification process, cutting the time it takes to resolve issues in half.',
     },
     {
       id: 'p5',
       title: 'Custom Portfolio Platform',
       meta: 'React • Tailwind • jsPDF',
       icon: Palette,
-      body: "The interactive website you're viewing now. Built as a single-file React application for maximum portability and zero-build deployment. Features dynamic PDF CV generation, system-preference aware dark mode, and responsive glassmorphism UI.",
-      impact: 'Demonstrates capability to build polished, performant frontend applications without complex toolchains, achieving 100/100 Lighthouse scores.',
+      body: 'Built a fast, easy-to-use personal website. It works well on all screens and downloads a clean PDF version of my resume, showing design practices that keep visitors engaged.',
+      impact: 'Got a perfect 100/100 performance score, making sure the site loads instantly and looks great.',
     },
   ];
 
@@ -656,11 +671,6 @@ export default function App() {
             <div className="relative z-10 flex flex-col gap-12 items-start">
               <div className="w-full">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
-                  <img
-                    src="https://github.com/mukung26.png"
-                    alt="Jerwin Cruspero"
-                    className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 shadow-md object-cover"
-                  />
                   <div>
                     <h2 className="text-blue-600 font-extrabold uppercase tracking-widest text-xs mb-2 md:mb-4">
                       Professional Summary
@@ -668,41 +678,64 @@ export default function App() {
                     <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
                       Jerwin Cruspero
                     </h1>
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded-full text-sm font-bold border border-blue-200 dark:border-blue-800 shadow-sm">
+                        Web Developer
+                      </span>
+                      <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-bold border border-emerald-200 dark:border-emerald-800 shadow-sm">
+                        Digital Marketing
+                      </span>
+                      <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-sm font-bold border border-amber-200 dark:border-amber-800 shadow-sm">
+                        Marketing Automation
+                      </span>
+                      <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 rounded-full text-sm font-bold border border-purple-200 dark:border-purple-800 shadow-sm">
+                        Virtual Assistant
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed mb-8 max-w-4xl">
-                  I create <strong>personal and custom websites</strong> designed for performance and
-                  reliability. Specializing in secure web tools using React, Tailwind CSS, and
-                  Cloudflare/Google database integrations, I help businesses automate workflows and
-                  improve data accuracy. With a background in Customer Service, Virtual Assistance, and Admin Support, I
-                  ensure every project is user-friendly and meets your specific needs.
+                  Results-oriented Web Developer and Digital Marketer. I build fast, user-friendly websites with React and automate marketing tasks to save time. By combining my web development skills with my background in customer service, I help businesses grow online, create better landing pages, and track the data that matters.
                 </p>
               </div>
               <div className="grid md:grid-cols-2 gap-8 w-full">
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 h-full">
-                  <h3 className="font-extrabold text-slate-900 dark:text-white mb-4">Technical Skills</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {coreSkills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-blue-700 dark:text-blue-400 shadow-sm relative overflow-hidden group hover:scale-105 transition-transform"
-                      >
-                        <span className="relative z-10">{skill}</span>
-                      </span>
-                    ))}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 h-full flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-slate-900 dark:text-white mb-6">Technical Skills</h3>
+                    <div className="space-y-6">
+                      {techSkillCategories.map((category) => (
+                        <div key={category.title}>
+                          <h4 className="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">
+                            {category.title}
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {category.skills.map((skill) => (
+                              <span
+                                key={skill}
+                                className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-blue-700 dark:text-blue-400 shadow-sm relative overflow-hidden group hover:scale-105 transition-transform"
+                              >
+                                <span className="relative z-10">{skill}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 h-full">
-                  <h3 className="font-extrabold text-slate-900 dark:text-white mb-4">Soft Skills</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {softSkills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 shadow-sm hover:scale-105 transition-transform"
-                      >
-                        {skill}
-                      </span>
-                    ))}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 h-full flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-slate-900 dark:text-white mb-6">Soft Skills</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {softSkills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="px-3 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 shadow-sm hover:scale-105 transition-transform"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -802,20 +835,16 @@ export default function App() {
                 </div>
                 <ul className="text-slate-600 dark:text-slate-400 space-y-4 text-base list-disc pl-5">
                   <li>
-                    Train new CSRs on order processing, credit handling, and escalation procedures;
-                    recognized as top performer with high QA scores.
+                    Trained new team members on how to use platforms, handle issues, and meet quality goals; recognized as a top performer.
                   </li>
                   <li>
-                    Primary contact for order entry and email inquiries; process customer orders while
-                    meeting SLAs.
+                    Acted as the main contact for customers, ensuring all accounts were handled quickly and professionally.
                   </li>
                   <li>
-                    Support AP readiness: input invoices and credit notes, prepare data for vendor
-                    reconciliation.
+                    Created clear spreadsheets and charts to track performance and important monthly goals.
                   </li>
                   <li>
-                    Prepare spreadsheets using formulas and pivot tables for month-end checks and GL
-                    allocations.
+                    Organized invoice records and checked payments to make sure everything was accurate.
                   </li>
                 </ul>
               </div>
@@ -834,15 +863,13 @@ export default function App() {
                 </div>
                 <ul className="text-slate-600 dark:text-slate-400 space-y-4 text-base list-disc pl-5">
                   <li>
-                    Managed administrative workflows and internal spreadsheets supporting month-end
-                    tasks.
+                    Handled daily administrative tasks and kept important team spreadsheets up-to-date.
                   </li>
                   <li>
-                    Streamlined booking and reporting processes, improving data accuracy and
-                    reducing admin time.
+                    Simplified reporting processes, making data tracking faster and more accurate.
                   </li>
                   <li>
-                    Provided chat and email support for customer inquiries and order coordination.
+                    Helped customers through chat and email, providing quick and polite solutions.
                   </li>
                 </ul>
               </div>
@@ -873,6 +900,12 @@ export default function App() {
                 </h3>
                 <div className="space-y-6">
                   <div>
+                    <h4 className="font-extrabold text-lg">Outlier AI Training</h4>
+                    <p className="text-white/40 text-xs font-bold uppercase mb-2">
+                      Prompt Engineering & AI Evaluation • 2023 – 2024
+                    </p>
+                  </div>
+                  <div className="pt-6 border-t border-white/10">
                     <h4 className="font-extrabold text-lg">Microsoft 365 Developer</h4>
                     <p className="text-white/40 text-xs font-bold uppercase mb-2">
                       Fundamentals • 2023 – 2024
@@ -967,7 +1000,7 @@ export default function App() {
           </div>
         </div>
         <div className="text-center text-slate-400 text-sm font-bold border-t border-slate-100 dark:border-slate-900 pt-8">
-          <p>© {new Date().getFullYear()} Jerwin Cruspero</p>
+          <p>© 2020 Jerwin Cruspero</p>
         </div>
       </footer>
 
