@@ -1,15 +1,17 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
+// Load configuration from environment variables (prefixed with VITE_)
 const firebaseConfig = {
-  apiKey: "AIzaSyAtjcHjhWjqGFQEfKio1etIxXe28lwDFoc",
-  authDomain: "portfolio-dded3.firebaseapp.com",
-  projectId: "portfolio-dded3",
-  storageBucket: "portfolio-dded3.firebasestorage.app",
-  messagingSenderId: "789528461532",
-  appId: "1:789528461532:web:9cb39413f3110c07b9b419",
-  measurementId: "G-JX6SDYYQH5"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
