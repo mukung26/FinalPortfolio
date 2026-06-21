@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
+import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { db } from './firebase';
 import {
   Sun,
   Moon,
@@ -17,7 +19,9 @@ import {
   Palette,
   MapPin,
   Mail,
-  ArrowRight
+  ArrowRight,
+  Users,
+  PieChart
 } from 'lucide-react';
 
 // --- Type Definitions ---
@@ -139,11 +143,12 @@ const downloadCV = async (): Promise<void> => {
     pdf.setFont('helvetica', 'normal');
 
     const techSkills = [
-      'Analytics & Reporting: Data Analysis (Excel), Business Dashboards, Performance Tracking',
+      'Analytics & Reporting: Data Analysis (Excel), Power BI, Business Dashboards, Performance Tracking',
       'Marketing Automation: Workflow Automation, App Integrations, Google Apps Script',
       'Web Development: Frontend (React, Tailwind), Website Optimization, User Experience',
       'Backend & Data: API Connections, Databases (Firebase, SQL), Node.js',
       'AI & Prompt Engineering: Prompt Writing, AI Content Generation, AI Model Testing',
+      'Data Entry & Admin: Data Entry (90 WPM), Document Formatting, Administrative Support',
     ];
 
     techSkills.forEach((line) => {
@@ -359,6 +364,42 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [activeSection, setActiveSection] = useState('summary');
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  // Track visits
+  useEffect(() => {
+    const trackVisit = async () => {
+      try {
+        const statsRef = doc(db, 'stats', 'visitors');
+        
+        if (!sessionStorage.getItem('hasVisited')) {
+          await updateDoc(statsRef, {
+            count: increment(1)
+          }).catch(async (err) => {
+            if (err.code === 'not-found') {
+              await setDoc(statsRef, { count: 1 });
+            }
+          });
+          sessionStorage.setItem('hasVisited', 'true');
+        }
+        
+        let snap = await getDoc(statsRef);
+        if (!snap.exists()) {
+          // Fallback just in case it wasn't created
+          await setDoc(statsRef, { count: 1 });
+          snap = await getDoc(statsRef);
+        }
+        
+        if (snap.exists()) {
+          setVisitorCount(snap.data().count);
+        }
+      } catch (error) {
+        console.error("Error updating visitor count", error);
+      }
+    };
+    
+    trackVisit();
+  }, []);
 
   // Infinite Scroll & Drag Logic
   const sliderRef = useRef<HTMLDivElement | null>(null);
@@ -505,7 +546,7 @@ export default function App() {
   const techSkillCategories = [
     {
       title: 'Analytics & Reporting',
-      skills: ['Data Analysis (Excel)', 'Business Dashboards', 'Performance Tracking'],
+      skills: ['Data Analysis (Excel)', 'Power BI', 'Business Dashboards', 'Performance Tracking'],
     },
     {
       title: 'Marketing Automation',
@@ -523,6 +564,10 @@ export default function App() {
       title: 'AI & Prompt Engineering',
       skills: ['Prompt Writing', 'AI Content Generation', 'AI Model Testing', 'Data Annotation'],
     },
+    {
+      title: 'Data Entry & Admin',
+      skills: ['Data Entry (90 WPM)', 'Document Formatting', 'Administrative Support'],
+    },
   ];
 
   const softSkills = [
@@ -535,6 +580,14 @@ export default function App() {
   ];
 
   const projects: Project[] = [
+    {
+      id: 'p6',
+      title: 'Sales Performance Dashboard',
+      meta: 'Power BI • Data Modeling • DAX',
+      icon: PieChart,
+      body: 'Developed an interactive Power BI dashboard to visualize sales trends, regional performance, and key metrics. This dashboard connected multiple data sources for real-time reporting.',
+      impact: 'Provided leadership with real-time data insights, cutting down reporting time and driving more informed business decisions.',
+    },
     {
       id: 'p1',
       title: 'Shift Attendance Automation',
@@ -999,8 +1052,15 @@ export default function App() {
             </a>
           </div>
         </div>
-        <div className="text-center text-slate-400 text-sm font-bold border-t border-slate-100 dark:border-slate-900 pt-8">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-center text-slate-400 text-sm font-bold border-t border-slate-100 dark:border-slate-900 pt-8 mt-8">
           <p>© 2020 Jerwin Cruspero</p>
+          {visitorCount !== null && (
+            <p className="flex items-center justify-center gap-2" title="Unique session visitors">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+              <Users className="w-4 h-4 opacity-75" />
+              <span>{visitorCount.toLocaleString()} {visitorCount === 1 ? 'Visitor' : 'Visitors'}</span>
+            </p>
+          )}
         </div>
       </footer>
 
