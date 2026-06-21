@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
-import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import {
   Sun,
@@ -366,13 +366,59 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('summary');
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
-  // Track visits
+  // Track visits with privacy-preserving geolocation
   useEffect(() => {
+    const maskIp = (ip: string): string => {
+      if (!ip) return 'Unknown';
+      if (ip.includes(':')) {
+        // IPv6 masking
+        const parts = ip.split(':');
+        if (parts.length > 2) {
+          return `${parts.slice(0, 3).join(':')}:XXXX:XXXX::`;
+        }
+        return 'IPv6-masked';
+      } else {
+        // IPv4 masking
+        const parts = ip.split('.');
+        if (parts.length === 4) {
+          return `${parts[0]}.${parts[1]}.${parts[2]}.XXX`;
+        }
+        return 'IPv4-masked';
+      }
+    };
+
+    const fetchIpDetails = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (!res.ok) throw new Error('ipapi.co failed');
+        return await res.json();
+      } catch (err) {
+        try {
+          // Fallback geolocator
+          const resFallback = await fetch('https://api.db-ip.com/v2/free/self');
+          if (resFallback.ok) {
+            const data = await resFallback.json();
+            return {
+              ip: data.ipAddress,
+              city: data.city,
+              region: data.stateProv || data.region,
+              country_name: data.countryName,
+              country_code: data.countryCode
+            };
+          }
+        } catch (fallbackErr) {
+          console.debug("Fallback IP locator also failed", fallbackErr);
+        }
+        return null;
+      }
+    };
+
     const trackVisit = async () => {
       try {
         const statsRef = doc(db, 'stats', 'visitors');
         
         if (!sessionStorage.getItem('hasVisited')) {
+          // Increment main counter
           await updateDoc(statsRef, {
             count: increment(1)
           }).catch(async (err) => {
@@ -380,12 +426,33 @@ export default function App() {
               await setDoc(statsRef, { count: 1 });
             }
           });
+
+          // Session-based Geo Log with privacy protection
+          const geoInfo = await fetchIpDetails();
+          const maskedIp = geoInfo?.ip ? maskIp(geoInfo.ip) : 'Unknown';
+          const country = geoInfo?.country_name || 'Unknown';
+          const countryCode = geoInfo?.country_code || 'Unknown';
+          const region = geoInfo?.region || 'Unknown';
+          const city = geoInfo?.city || 'Unknown';
+          const isp = geoInfo?.org || 'Unknown';
+
+          await addDoc(collection(db, 'stats'), {
+            type: 'visitor-log',
+            timestamp: new Date().toISOString(),
+            ip: maskedIp,
+            country,
+            countryCode,
+            region,
+            city,
+            isp,
+            userAgent: navigator.userAgent
+          });
+
           sessionStorage.setItem('hasVisited', 'true');
         }
         
         let snap = await getDoc(statsRef);
         if (!snap.exists()) {
-          // Fallback just in case it wasn't created
           await setDoc(statsRef, { count: 1 });
           snap = await getDoc(statsRef);
         }
