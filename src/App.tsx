@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
-import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 import {
   Sun,
@@ -21,7 +21,16 @@ import {
   Mail,
   ArrowRight,
   Users,
-  PieChart
+  PieChart,
+  Globe,
+  ChevronDown,
+  ChevronUp,
+  Smartphone,
+  Laptop,
+  Clock,
+  Server,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 // --- Type Definitions ---
@@ -102,7 +111,7 @@ const downloadCV = async (): Promise<void> => {
     y += 5;
 
     // Portfolio Link
-    const portfolioUrl = 'https://mukung26.github.io/OnlinePortfolio/';
+    const portfolioUrl = 'https://portfolio.jcruspero3263.workers.dev/';
     pdf.setTextColor(11, 95, 255);
     pdf.text('Portfolio: ' + portfolioUrl, margin, y);
     pdf.link(margin, y - 3, pdf.getTextWidth('Portfolio: ' + portfolioUrl), 4, {
@@ -358,6 +367,58 @@ const ContactForm: React.FC = () => {
   );
 };
 
+// --- Visitor Stats Helper Functions ---
+const getDeviceDetails = (ua: string) => {
+  if (!ua) return { icon: Laptop, text: 'Desktop' };
+  const lowerUA = ua.toLowerCase();
+  if (lowerUA.includes('mobile') || lowerUA.includes('iphone') || lowerUA.includes('android')) {
+    return { icon: Smartphone, text: 'Mobile' };
+  }
+  return { icon: Laptop, text: 'Desktop' };
+};
+
+const formatRelTime = (isoString: string) => {
+  try {
+    const past = new Date(isoString);
+    const diff = Date.now() - past.getTime();
+    if (diff < 60000) return 'Just now';
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return past.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return 'Recently';
+  }
+};
+
+const getCountryFlag = (country: string, code: string) => {
+  if (!country || country === 'Unknown') return '🌐';
+  const name = country.toLowerCase();
+  if (name.includes('philippines')) return '🇵🇭';
+  if (name.includes('united states') || name.includes('usa')) return '🇺🇸';
+  if (name.includes('canada')) return '🇨🇦';
+  if (name.includes('united kingdom') || name.includes('uk')) return '🇬🇧';
+  if (name.includes('australia')) return '🇦🇺';
+  if (name.includes('singapore')) return '🇸🇬';
+  if (name.includes('germany')) return '🇩🇪';
+  if (name.includes('japan')) return '🇯🇵';
+  if (name.includes('india')) return '🇮🇳';
+  
+  if (code && code.length === 2) {
+    const codePoints = code
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
+    try {
+      return String.fromCodePoint(...codePoints);
+    } catch {
+      return '🌐';
+    }
+  }
+  return '🌐';
+};
+
 // --- Main App Component ---
 export default function App() {
   const [isDark, setIsDark] = useState(false);
@@ -365,6 +426,81 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [activeSection, setActiveSection] = useState('summary');
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [showVisitorDetails, setShowVisitorDetails] = useState(false);
+  const [visitorLogs, setVisitorLogs] = useState<any[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('isAdminAuthenticated') === 'true';
+  });
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const fetchVisitorLogs = async () => {
+    if (localStorage.getItem('isAdminAuthenticated') !== 'true') return;
+    setIsLoadingLogs(true);
+    try {
+      const q = query(collection(db, 'stats'));
+      const querySnapshot = await getDocs(q);
+      const logs = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter((item: any) => item.type === 'visitor-log' && item.timestamp)
+        .sort((a: any, b: any) => b.timestamp.localeCompare(a.timestamp));
+      setVisitorLogs(logs);
+    } catch (error) {
+      console.error("Error fetching visitor logs:", error);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
+  const handleToggleVisitorDetails = () => {
+    const nextVal = !showVisitorDetails;
+    setShowVisitorDetails(nextVal);
+    if (nextVal && localStorage.getItem('isAdminAuthenticated') === 'true') {
+      fetchVisitorLogs();
+    }
+  };
+
+  const handleAdminAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanPass = adminPasswordInput.trim();
+    const allowedPasscodes = ["admin123", "jerwin3263", "jerwin123", "jerwin", "portfolio123"];
+    
+    const customPasscode = import.meta.env.VITE_ADMIN_PASSCODE;
+    if (customPasscode) {
+      allowedPasscodes.push(customPasscode.trim());
+    }
+
+    if (allowedPasscodes.includes(cleanPass)) {
+      setIsAdminAuthenticated(true);
+      localStorage.setItem('isAdminAuthenticated', 'true');
+      setAuthError(null);
+      
+      // Fetch logs immediately
+      setIsLoadingLogs(true);
+      const q = query(collection(db, 'stats'));
+      getDocs(q).then(querySnapshot => {
+        const logs = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter((item: any) => item.type === 'visitor-log' && item.timestamp)
+          .sort((a: any, b: any) => b.timestamp.localeCompare(a.timestamp));
+        setVisitorLogs(logs);
+      }).catch(error => {
+        console.error("Error fetching visitor logs:", error);
+      }).finally(() => {
+        setIsLoadingLogs(false);
+      });
+    } else {
+      setAuthError("Incorrect admin passcode. Try again!");
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false);
+    localStorage.removeItem('isAdminAuthenticated');
+    setAdminPasswordInput('');
+    setVisitorLogs([]);
+  };
 
   // Track visits with privacy-preserving geolocation
   useEffect(() => {
@@ -1119,14 +1255,191 @@ export default function App() {
             </a>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-center text-slate-400 text-sm font-bold border-t border-slate-100 dark:border-slate-900 pt-8 mt-8">
-          <p>© 2020 Jerwin Cruspero</p>
-          {visitorCount !== null && (
-            <p className="flex items-center justify-center gap-2" title="Unique session visitors">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-              <Users className="w-4 h-4 opacity-75" />
-              <span>{visitorCount.toLocaleString()} {visitorCount === 1 ? 'Visitor' : 'Visitors'}</span>
-            </p>
+        <div className="flex flex-col justify-center items-center gap-4 text-center text-slate-400 text-sm font-bold border-t border-slate-100 dark:border-slate-900 pt-8 mt-8">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4">
+            <p>© 2020 Jerwin Cruspero</p>
+            {visitorCount !== null && (
+              <button
+                onClick={handleToggleVisitorDetails}
+                className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 px-3.5 py-1.5 rounded-full transition-all cursor-pointer select-none font-bold text-xs border border-transparent dark:border-slate-800"
+                title="Click to view live traffic analytics"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <Users className="w-3.5 h-3.5 opacity-75" />
+                <span>{visitorCount.toLocaleString()} {visitorCount === 1 ? 'Visitor' : 'Visitors'}</span>
+                {showVisitorDetails ? (
+                  <ChevronUp className="w-3.5 h-3.5 ml-0.5" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
+                )}
+              </button>
+            )}
+          </div>
+
+          {showVisitorDetails && (
+            <div className="w-full max-w-2xl mx-auto mt-6 p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-xl text-left animate-fade-in">
+              {!isAdminAuthenticated ? (
+                <div className="py-8 flex flex-col items-center justify-center text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-55 dark:bg-blue-950/40 flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 border border-blue-100/10 shadow-sm">
+                    <Lock className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <h4 className="font-extrabold text-slate-850 dark:text-white text-base">Passcode Required</h4>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-1 mb-6 max-w-sm">
+                    This section is private. Enter your admin passcode to access live visitor analytics.
+                  </p>
+                  
+                  <form onSubmit={handleAdminAuthSubmit} className="w-full max-w-xs flex flex-col gap-3">
+                    <div>
+                      <input
+                        type="password"
+                        placeholder="Enter admin passcode"
+                        value={adminPasswordInput}
+                        onChange={(e) => {
+                          setAdminPasswordInput(e.target.value);
+                          if (authError) setAuthError(null);
+                        }}
+                        className="w-full px-4 py-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                        autoFocus
+                      />
+                      {authError && (
+                        <p className="text-[11px] text-red-500 font-bold mt-2 text-left bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100/10">⚠️ {authError}</p>
+                      )}
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      Unlock Records
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div>
+                      <h4 className="font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <span>Visitor Traffic Analytics</span>
+                      </h4>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-1">Real-time masked analytics from your Firestore</p>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                      <button
+                        onClick={fetchVisitorLogs}
+                        disabled={isLoadingLogs}
+                        className="text-xs font-extrabold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all uppercase tracking-wider flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      >
+                        {isLoadingLogs ? (
+                          <span className="w-3 h-3 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+                        ) : (
+                          <span>Refresh</span>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleAdminLogout}
+                        className="text-xs font-extrabold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider cursor-pointer"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+
+                  {isLoadingLogs && visitorLogs.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400 dark:text-slate-500 flex flex-col items-center justify-center gap-3">
+                      <span className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></span>
+                      <p className="text-sm font-bold">Loading visitor records...</p>
+                    </div>
+                  ) : visitorLogs.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400 dark:text-slate-500">
+                      <p className="text-sm font-bold">No visitor logs have been stored yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Summary Pills: Countries */}
+                      <div>
+                        <h5 className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2">Visits By Location</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(
+                            visitorLogs.reduce((acc, log) => {
+                              const countryName = log.country || 'Unknown';
+                              acc[countryName] = (acc[countryName] || 0) + 1;
+                              return acc;
+                            }, {} as Record<string, number>)
+                          )
+                            .sort((a, b) => (b[1] as number) - (a[1] as number))
+                            .slice(0, 5)
+                            .map(([country, count]) => (
+                              <div
+                                key={country}
+                                className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-100/60 dark:border-slate-800"
+                              >
+                                <span className="text-sm">
+                                  {getCountryFlag(country, visitorLogs.find(l => l.country === country)?.countryCode)}
+                                </span>
+                                <span>{country}</span>
+                                <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-1.5 py-0.5 rounded-md text-[10px]">
+                                  {count}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+
+                      {/* Log List */}
+                      <div>
+                        <h5 className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2">Recent Visits Log (Latest 30)</h5>
+                        <div className="max-h-64 overflow-y-auto pr-1 space-y-2 border border-slate-100 dark:border-slate-850 rounded-xl p-2 bg-slate-50/50 dark:bg-slate-950/20">
+                          {visitorLogs.slice(0, 30).map((log, index) => {
+                            const device = getDeviceDetails(log.userAgent);
+                            const DeviceIcon = device.icon;
+                            
+                            return (
+                              <div
+                                key={log.id || index}
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 rounded-xl hover:shadow-sm transition-all"
+                              >
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/15 flex items-center justify-center text-sm shrink-0">
+                                    <span className="text-lg">
+                                      {getCountryFlag(log.country, log.countryCode)}
+                                    </span>
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <p className="font-bold text-xs text-slate-850 dark:text-slate-200 truncate max-w-[200px]">
+                                        {log.city && log.city !== 'Unknown' ? `${log.city}, ` : ''}
+                                        {log.region && log.region !== 'Unknown' ? `${log.region}` : log.country || 'Unknown'}
+                                      </p>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold truncate max-w-[200px]">
+                                      {log.isp && log.isp !== 'Unknown' ? log.isp : 'Network Provider'}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto text-[10px] sm:text-xs">
+                                  <div className="text-left sm:text-right font-mono">
+                                    <p className="text-slate-650 dark:text-slate-350 font-bold">{log.ip || 'Masked'}</p>
+                                    <p className="text-[9px] text-slate-400 dark:text-slate-500 flex items-center gap-1 justify-start sm:justify-end">
+                                      <DeviceIcon className="w-2.5 h-2.5 inline" />
+                                      <span>{device.text}</span>
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 font-bold font-mono text-slate-450 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 px-2 py-1 rounded">
+                                    <Clock className="w-3 h-3 text-slate-400" />
+                                    <span>{formatRelTime(log.timestamp)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           )}
         </div>
       </footer>
